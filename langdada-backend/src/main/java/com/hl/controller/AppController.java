@@ -77,19 +77,30 @@ public class AppController {
     }
 
     /**
-     * 更新应用
+     * 审核应用-管理员
      *
      * @param appUpdateRequest 参数
      * @return 结果
      */
-    @ApiOperation(value = "更新应用")
-    @PostMapping("/update")
+    @ApiOperation(value = "审核应用")
+    @PostMapping("/review")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> updateApp(@RequestBody AppUpdateRequest appUpdateRequest) {
+    public BaseResponse<Boolean> reviewApp(@RequestBody AppUpdateRequest appUpdateRequest) {
         if (appUpdateRequest == null || appUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean result = appService.updateApp(appUpdateRequest);
+        boolean result = appService.reviewApp(appUpdateRequest);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
+    @ApiOperation(value = "更新应用")
+    @PostMapping("/edit")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> editApp(@RequestBody AppEditRequest appEditRequest) {
+        if (appEditRequest == null || appEditRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        boolean result = appService.editApp(appEditRequest);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
     }

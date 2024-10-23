@@ -1,38 +1,32 @@
-package com.hl.model.entity;
+package com.hl.model.dto.scoringResult;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.hl.common.PageRequest;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
 
 /**
- * 评分结果
- * @TableName scoring_result
+ * 查询评分结果请求
+ *
+ *
+ * 
  */
-@TableName(value ="scoring_result")
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class ScoringResult implements Serializable {
+public class ScoringResultQueryRequest extends PageRequest implements Serializable {
+
     /**
      * id
      */
-    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /**
      * 结果名称，如物流师
      */
     private String resultName;
-
-    /**
-     * 结果描述
-     */
-    private String resultDesc;
-
-    /**
-     * 结果图片
-     */
-    private String resultPicture;
 
     /**
      * 结果属性集合 JSON，如 [I,S,T,J]
@@ -69,7 +63,5 @@ public class ScoringResult implements Serializable {
      */
     @TableLogic
     private Integer isDelete;
-
-    @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

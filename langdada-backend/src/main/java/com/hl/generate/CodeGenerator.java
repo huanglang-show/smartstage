@@ -30,9 +30,9 @@ public class CodeGenerator {
     public static void main(String[] args) throws TemplateException, IOException {
         // 指定生成参数
         String packageName = "com.hl";
-        String dataName = "评分结果";
-        String dataKey = "question";
-        String upperDataKey = "Question";
+        String dataName = "用户答题";
+        String dataKey = "userAnswer";
+        String upperDataKey = "UserAnswer";
 
         // 封装生成参数
         Map<String, Object> dataModel = new HashMap<>();
@@ -52,19 +52,19 @@ public class CodeGenerator {
         inputPath = projectPath + File.separator + "src/main/resources/templates/TemplateController.java.ftl";
         outputPath = String.format("%s/generator/controller/%sController.java", projectPath, upperDataKey);
         // 生成
-//        doGenerate(inputPath, outputPath, dataModel);
+        doGenerate(inputPath, outputPath, dataModel);
         System.out.println("生成 Controller 成功，文件路径：" + outputPath);
 
         // 2、生成 Service 接口和实现类
         // 生成 Service 接口
         inputPath = projectPath + File.separator + "src/main/resources/templates/TemplateService.java.ftl";
         outputPath = String.format("%s/generator/service/%sService.java", projectPath, upperDataKey);
-//        doGenerate(inputPath, outputPath, dataModel);
+        doGenerate(inputPath, outputPath, dataModel);
         System.out.println("生成 Service 接口成功，文件路径：" + outputPath);
         // 生成 Service 实现类
         inputPath = projectPath + File.separator + "src/main/resources/templates/TemplateServiceImpl.java.ftl";
         outputPath = String.format("%s/generator/service/impl/%sServiceImpl.java", projectPath, upperDataKey);
-//        doGenerate(inputPath, outputPath, dataModel);
+        doGenerate(inputPath, outputPath, dataModel);
         System.out.println("生成 Service 实现类成功，文件路径：" + outputPath);
 
         // 3、生成数据模型封装类（包括 DTO 和 VO）

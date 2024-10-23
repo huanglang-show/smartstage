@@ -1,4 +1,4 @@
-package com.hl.model;
+package com.hl.model.dto.question;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;

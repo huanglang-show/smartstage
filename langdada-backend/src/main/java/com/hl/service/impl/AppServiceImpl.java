@@ -12,6 +12,7 @@ import com.hl.exception.BusinessException;
 import com.hl.exception.ThrowUtils;
 import com.hl.mapper.AppMapper;
 import com.hl.model.dto.app.AppAddRequest;
+import com.hl.model.dto.app.AppEditRequest;
 import com.hl.model.dto.app.AppQueryRequest;
 import com.hl.model.dto.app.AppUpdateRequest;
 import com.hl.model.entity.App;
@@ -50,6 +51,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     public Long addApp(AppAddRequest appAddRequest) {
         App app = new App();
         BeanUtils.copyProperties(appAddRequest, app);
+        // 当前用户
+        User user = userService.getLoginUserByRequest();
+        app.setUserId(user.getId());
         validApp(app, true);
         boolean save = this.save(app);
         if(!save){
@@ -77,9 +81,23 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     }
 
     @Override
-    public boolean updateApp(AppUpdateRequest appUpdateRequest) {
+    public boolean reviewApp(AppUpdateRequest appUpdateRequest) {
         // 判断是否存在
         long id = appUpdateRequest.getId();
+        App app = this.getById(id);
+        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
+        app.setReviewerId(userService.getLoginUserByRequest().getId());
+        app.setReviewStatus(appUpdateRequest.getReviewStatus());
+        app.setReviewMessage(appUpdateRequest.getReviewMessage());
+        app.setReviewTime(new Date());
+        // 操作数据库
+        return this.updateById(app);
+    }
+
+    @Override
+    public boolean editApp(AppEditRequest appEditRequest) {
+        // 判断是否存在
+        long id = appEditRequest.getId();
         App oldApp = this.getById(id);
         ThrowUtils.throwIf(oldApp == null, ErrorCode.NOT_FOUND_ERROR);
         User user = userService.getLoginUserByRequest();
@@ -88,7 +106,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         App app = new App();
-        BeanUtils.copyProperties(appUpdateRequest, app);
+        BeanUtils.copyProperties(appEditRequest, app);
         // 数据校验
         validApp(app, false);
         // 操作数据库

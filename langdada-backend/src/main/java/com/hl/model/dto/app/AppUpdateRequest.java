@@ -45,6 +45,16 @@ public class AppUpdateRequest implements Serializable {
      * 评分策略（0-自定义，1-AI）
      */
     private Integer scoringStrategy;
+    /**
+     * 审核状态：0-待审核, 1-通过, 2-拒绝
+     */
+    private Integer reviewStatus;
+
+    /**
+     * 审核信息
+     */
+    private String reviewMessage;
+
 
     private static final long serialVersionUID = 1L;
 }
