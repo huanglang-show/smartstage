@@ -114,6 +114,20 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     }
 
     /**
+     * 下线应用
+     * @param id id
+     * @return 结果
+     */
+    @Override
+    public boolean offlineApp(Long id) {
+        App app = this.getById(id);
+        if(ObjectUtils.isEmpty(app)){
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        return this.removeById(app);
+    }
+
+    /**
      * 校验数据
      *
      * @param app  数据

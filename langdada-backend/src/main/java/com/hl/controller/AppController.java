@@ -95,7 +95,6 @@ public class AppController {
     }
     @ApiOperation(value = "更新应用")
     @PostMapping("/edit")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> editApp(@RequestBody AppEditRequest appEditRequest) {
         if (appEditRequest == null || appEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -140,5 +139,17 @@ public class AppController {
     public BaseResponse<Page<AppVO>> listMyAppVOByPage(@RequestBody AppQueryRequest appQueryRequest) {
         // 获取封装类
         return ResultUtils.success(appService.listMyAppVOByPage(appQueryRequest));
+    }
+
+    /**
+     * 下线应用
+     *
+     * @param deleteRequest 请求参数
+     * @return 结果
+     */
+    @PostMapping("/offline")
+    public BaseResponse<Boolean> offlineApp(@RequestBody DeleteRequest deleteRequest){
+       boolean result = appService.offlineApp(deleteRequest.getId());
+       return ResultUtils.success(result);
     }
 }

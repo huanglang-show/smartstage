@@ -74,4 +74,6 @@ public interface AppService extends IService<App> {
     Page<AppVO> listMyAppVOByPage(AppQueryRequest appQueryRequest);
 
     boolean editApp(AppEditRequest appEditRequest);
+
+    boolean offlineApp(Long id);
 }
