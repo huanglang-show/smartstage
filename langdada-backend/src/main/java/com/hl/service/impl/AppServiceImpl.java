@@ -4,6 +4,7 @@ import java.util.*;
 
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hl.common.ErrorCode;
@@ -16,8 +17,10 @@ import com.hl.model.dto.app.AppEditRequest;
 import com.hl.model.dto.app.AppQueryRequest;
 import com.hl.model.dto.app.AppUpdateRequest;
 import com.hl.model.entity.App;
+import com.hl.model.entity.Question;
 import com.hl.model.entity.User;
 import com.hl.model.vo.AppVO;
+import com.hl.model.vo.QuestionVO;
 import com.hl.model.vo.UserVO;
 import com.hl.service.AppService;
 import com.hl.service.UserService;
@@ -186,6 +189,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
                 .eq(reviewTime != null, "reviewTime", reviewTime)
                 .eq(userId != null, "userId", userId)
                 .eq(createTime != null, "createTime", createTime)
+                .eq("isDelete",0)
                 .orderBy(StringUtils.isNotBlank(sortField), "asc".equalsIgnoreCase(sortOrder), sortField);
         return queryWrapper;
     }
@@ -204,16 +208,52 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
     }
 
     /**
+     * 分页获取题目封装
+     *
+     * @param appPage page
+     * @param request   request
+     * @return page
+     */
+    @Override
+    public Page<AppVO> getAppVOPage(Page<App> appPage, HttpServletRequest request) {
+        List<App> appList = appPage.getRecords();
+        Page<AppVO> appVOPage = new Page<>(appPage.getCurrent(), appPage.getSize(), appPage.getTotal());
+        if (CollUtil.isEmpty(appList)) {
+            return appVOPage;
+        }
+        // 对象列表 => 封装对象列表
+        List<AppVO> appVOList = appList.stream().map(AppVO::objToVo).collect(Collectors.toList());
+
+        // 1. 关联查询用户信息
+        Set<Long> userIdSet = appList.stream().map(App::getUserId).collect(Collectors.toSet());
+        Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
+                .collect(Collectors.groupingBy(User::getId));
+        // 填充信息
+        appVOList.forEach(appVO -> {
+            Long userId = appVO.getUserId();
+            User user = null;
+            if (userIdUserListMap.containsKey(userId)) {
+                user = userIdUserListMap.get(userId).get(0);
+            }
+            appVO.setUser(userService.getUserVO(user));
+        });
+        appVOPage.setRecords(appVOList);
+        return appVOPage;
+    }
+
+    /**
      * 获取应用封装
      *
      * @param id 数据
-     * @return
+     * @return appVo
      */
     @Override
     public AppVO getAppVO(Long id) {
+        ThrowUtils.throwIf(id == null, ErrorCode.PARAMS_ERROR);
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         // 查询数据库
-        App app = this.getById(id);
+        App app = this.getOne(Wrappers.lambdaQuery(App.class).eq(App::getId, id)
+                .eq(App::getIsDelete, 0));
         ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
         // 对象转封装类
         AppVO appVO = AppVO.objToVo(app);

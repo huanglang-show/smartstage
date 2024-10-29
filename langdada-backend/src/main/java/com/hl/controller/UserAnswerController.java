@@ -19,6 +19,8 @@ import com.hl.model.entity.UserAnswer;
 import com.hl.model.entity.User;
 import com.hl.model.enums.ReviewStatusEnum;
 import com.hl.model.vo.UserAnswerVO;
+import com.hl.scoring.ScoringStrategy;
+import com.hl.scoring.ScoringStrategyExecutor;
 import com.hl.service.AppService;
 import com.hl.service.UserAnswerService;
 import com.hl.service.UserService;
@@ -49,6 +51,9 @@ public class UserAnswerController {
     @Resource
     private AppService appService;
 
+    @Resource
+    private ScoringStrategyExecutor scoringStrategyExecutor;
+
     /**
      * 创建用户答题
      *
@@ -77,8 +82,15 @@ public class UserAnswerController {
         // 返回新写入的数据 id
         long newUserAnswerId = userAnswer.getId();
 
-        // todo 调用评分模块
-
+        // 调用评分模块
+        try {
+            UserAnswer userAnswerWithResult = scoringStrategyExecutor.doScore(userAnswerAddRequest.getChoices(), app);
+            userAnswerWithResult.setId(userAnswer.getId());
+            userAnswerService.updateById(userAnswerWithResult);
+        }catch (Exception e){
+            log.error("评分模块调用失败",e);
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "评分错误");
+        }
         return ResultUtils.success(newUserAnswerId);
     }
 
@@ -121,16 +133,17 @@ public class UserAnswerController {
         if (userAnswerUpdateRequest == null || userAnswerUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // 将实体类和 DTO 进行转换
-        UserAnswer userAnswer = new UserAnswer();
-        BeanUtils.copyProperties(userAnswerUpdateRequest, userAnswer);
-        userAnswer.setChoices(JSONUtil.toJsonStr(userAnswerUpdateRequest.getChoices()));
-        // 数据校验
-        userAnswerService.validUserAnswer(userAnswer, false);
         // 判断是否存在
         long id = userAnswerUpdateRequest.getId();
         UserAnswer oldUserAnswer = userAnswerService.getById(id);
         ThrowUtils.throwIf(oldUserAnswer == null, ErrorCode.NOT_FOUND_ERROR);
+        // 将实体类和 DTO 进行转换
+        UserAnswer userAnswer = new UserAnswer();
+        BeanUtils.copyProperties(userAnswerUpdateRequest, userAnswer);
+        userAnswer.setAppId(oldUserAnswer.getAppId());
+        userAnswer.setChoices(JSONUtil.toJsonStr(userAnswerUpdateRequest.getChoices()));
+        // 数据校验
+        userAnswerService.validUserAnswer(userAnswer, false);
         // 操作数据库
         boolean result = userAnswerService.updateById(userAnswer);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
@@ -228,17 +241,18 @@ public class UserAnswerController {
         if (userAnswerEditRequest == null || userAnswerEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // 将实体类和 DTO 进行转换
-        UserAnswer userAnswer = new UserAnswer();
-        BeanUtils.copyProperties(userAnswerEditRequest, userAnswer);
-        userAnswer.setChoices(JSONUtil.toJsonStr(userAnswerEditRequest.getChoices()));
-        // 数据校验
-        userAnswerService.validUserAnswer(userAnswer, false);
-        User loginUser = userService.getLoginUser(request);
         // 判断是否存在
         long id = userAnswerEditRequest.getId();
         UserAnswer oldUserAnswer = userAnswerService.getById(id);
         ThrowUtils.throwIf(oldUserAnswer == null, ErrorCode.NOT_FOUND_ERROR);
+        // 将实体类和 DTO 进行转换
+        UserAnswer userAnswer = new UserAnswer();
+        BeanUtils.copyProperties(userAnswerEditRequest, userAnswer);
+        userAnswer.setAppId(oldUserAnswer.getAppId());
+        userAnswer.setChoices(JSONUtil.toJsonStr(userAnswerEditRequest.getChoices()));
+        // 数据校验
+        userAnswerService.validUserAnswer(userAnswer, false);
+        User loginUser = userService.getLoginUser(request);
         // 仅本人或管理员可编辑
         if (!oldUserAnswer.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);

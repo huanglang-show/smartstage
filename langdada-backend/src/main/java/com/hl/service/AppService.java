@@ -9,6 +9,7 @@ import com.hl.model.dto.app.AppQueryRequest;
 import com.hl.model.dto.app.AppUpdateRequest;
 import com.hl.model.entity.App;
 import com.hl.model.vo.AppVO;
+import com.hl.model.vo.QuestionVO;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -76,4 +77,6 @@ public interface AppService extends IService<App> {
     boolean editApp(AppEditRequest appEditRequest);
 
     boolean offlineApp(Long id);
+
+    Page<AppVO> getAppVOPage(Page<App> appPage, HttpServletRequest request);
 }

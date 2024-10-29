@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.hl.model.entity.App;
+import com.hl.model.entity.User;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
@@ -96,6 +97,11 @@ public class AppVO implements Serializable {
      * 是否删除
      */
     private Integer isDelete;
+
+    /**
+     * 用户信息
+     */
+    private UserVO user;
 
     /**
      * 封装类转对象

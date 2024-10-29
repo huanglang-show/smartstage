@@ -1,6 +1,9 @@
 package com.hl.controller;
 
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hl.annotation.AuthCheck;
 import com.hl.common.BaseResponse;
@@ -96,16 +99,17 @@ public class QuestionController {
         if (questionUpdateRequest == null || questionUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        //将实体类和 DTO 进行转换
-        Question question = new Question();
-        BeanUtils.copyProperties(questionUpdateRequest, question);
-        question.setQuestionContent(JSONUtil.toJsonStr(questionUpdateRequest.getQuestionContent()));
-        // 数据校验
-        questionService.validQuestion(question, false);
         // 判断是否存在
         long id = questionUpdateRequest.getId();
         Question oldQuestion = questionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
+        //将实体类和 DTO 进行转换
+        Question question = new Question();
+        BeanUtils.copyProperties(questionUpdateRequest, question);
+        question.setAppId(oldQuestion.getAppId());
+            question.setQuestionContent(JSONUtil.toJsonStr(questionUpdateRequest.getQuestionContent()));
+        // 数据校验
+        questionService.validQuestion(question, false);
         // 操作数据库
         boolean result = questionService.updateById(question);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
@@ -122,7 +126,9 @@ public class QuestionController {
     public BaseResponse<QuestionVO> getQuestionVOById(long id) {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         // 查询数据库
-        Question question = questionService.getById(id);
+        Question question = questionService.getOne(
+                Wrappers.lambdaQuery(Question.class).eq(Question::getId, id)
+                        .eq(Question::getIsDelete, 0));
         ThrowUtils.throwIf(question == null, ErrorCode.NOT_FOUND_ERROR);
         // 获取封装类
         return ResultUtils.success(questionService.getQuestionVO(question));
@@ -203,17 +209,18 @@ public class QuestionController {
         if (questionEditRequest == null || questionEditRequest.getAppId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // 将实体类和 DTO 进行转换
-        Question question = new Question();
-        BeanUtils.copyProperties(questionEditRequest, question);
-        question.setQuestionContent(JSONUtil.toJsonStr(questionEditRequest.getQuestionContent()));
-        // 数据校验
-        questionService.validQuestion(question, false);
-        User loginUser = userService.getLoginUser(request);
         // 判断是否存在
         long id = questionEditRequest.getAppId();
         Question oldQuestion = questionService.getById(id);
+        // 将实体类和 DTO 进行转换
+        Question question = new Question();
+        BeanUtils.copyProperties(questionEditRequest, question);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
+        question.setQuestionContent(JSONUtil.toJsonStr(questionEditRequest.getQuestionContent()));
+        // 数据校验
+        question.setAppId(oldQuestion.getAppId());
+        questionService.validQuestion(question, false);
+        User loginUser = userService.getLoginUser(request);
         // 仅本人或管理员可编辑
         if (!oldQuestion.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);

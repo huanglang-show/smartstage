@@ -69,7 +69,6 @@ public class ScoringResultServiceImpl extends ServiceImpl<ScoringResultMapper, S
             ThrowUtils.throwIf(StringUtils.isBlank(resultName), ErrorCode.PARAMS_ERROR);
             ThrowUtils.throwIf(StringUtils.isBlank(resultDesc), ErrorCode.PARAMS_ERROR);
             ThrowUtils.throwIf(appId == null, ErrorCode.PARAMS_ERROR);
-            ThrowUtils.throwIf(StringUtils.isBlank(resultProp), ErrorCode.PARAMS_ERROR);
         }
         // 通过应用id查询应用
         App app = appService.getById(appId);

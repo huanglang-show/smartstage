@@ -13,9 +13,12 @@ import com.hl.model.dto.app.AppAddRequest;
 import com.hl.model.dto.app.AppEditRequest;
 import com.hl.model.dto.app.AppQueryRequest;
 import com.hl.model.dto.app.AppUpdateRequest;
+import com.hl.model.dto.question.QuestionQueryRequest;
 import com.hl.model.entity.App;
+import com.hl.model.entity.Question;
 import com.hl.model.entity.User;
 import com.hl.model.vo.AppVO;
+import com.hl.model.vo.QuestionVO;
 import com.hl.service.AppService;
 import com.hl.service.UserService;
 import io.swagger.annotations.Api;
@@ -128,7 +131,26 @@ public class AppController {
         Page<AppVO> appPage = appService.listAppByPage(appQueryRequest);
         return ResultUtils.success(appPage);
     }
-
+    /**
+     * 分页获取题目列表（封装类）
+     *
+     * @param appQueryRequest 请求参数
+     * @param request request
+     * @return page
+     */
+    @PostMapping("/list/page/vo")
+    public BaseResponse<Page<AppVO>> listAppVOByPage(@RequestBody AppQueryRequest appQueryRequest,
+                                                               HttpServletRequest request) {
+        long current = appQueryRequest.getCurrent();
+        long size = appQueryRequest.getPageSize();
+        // 限制爬虫
+        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        // 查询数据库
+        Page<App> appPage = appService.page(new Page<>(current, size),
+                appService.getQueryWrapper(appQueryRequest));
+        // 获取封装类
+        return ResultUtils.success(appService.getAppVOPage(appPage, request));
+    }
     /**
      * 分页获取当前登录用户创建的应用列表
      *

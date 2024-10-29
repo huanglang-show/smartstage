@@ -107,16 +107,17 @@ public class ScoringResultController {
         if (scoringResultUpdateRequest == null || scoringResultUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // 将实体类和 DTO 进行转换
-        ScoringResult scoringResult = new ScoringResult();
-        BeanUtils.copyProperties(scoringResultUpdateRequest, scoringResult);
-        scoringResult.setResultProp(JSONUtil.toJsonStr(scoringResultUpdateRequest.getResultProp()));
-        // 数据校验
-        scoringResultService.validScoringResult(scoringResult, false);
         // 判断是否存在
         long id = scoringResultUpdateRequest.getId();
         ScoringResult oldScoringResult = scoringResultService.getById(id);
         ThrowUtils.throwIf(oldScoringResult == null, ErrorCode.NOT_FOUND_ERROR);
+        // 将实体类和 DTO 进行转换
+        ScoringResult scoringResult = new ScoringResult();
+        BeanUtils.copyProperties(scoringResultUpdateRequest, scoringResult);
+        scoringResult.setAppId(oldScoringResult.getAppId());
+        scoringResult.setResultProp(JSONUtil.toJsonStr(scoringResultUpdateRequest.getResultProp()));
+        // 数据校验
+        scoringResultService.validScoringResult(scoringResult, false);
         // 操作数据库
         boolean result = scoringResultService.updateById(scoringResult);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
@@ -214,17 +215,18 @@ public class ScoringResultController {
         if (scoringResultEditRequest == null || scoringResultEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // 将实体类和 DTO 进行转换
-        ScoringResult scoringResult = new ScoringResult();
-        BeanUtils.copyProperties(scoringResultEditRequest, scoringResult);
-        scoringResult.setResultProp(JSONUtil.toJsonStr(scoringResultEditRequest.getResultProp()));
-        // 数据校验
-        scoringResultService.validScoringResult(scoringResult, false);
-        User loginUser = userService.getLoginUser(request);
         // 判断是否存在
         long id = scoringResultEditRequest.getId();
         ScoringResult oldScoringResult = scoringResultService.getById(id);
         ThrowUtils.throwIf(oldScoringResult == null, ErrorCode.NOT_FOUND_ERROR);
+        // 将实体类和 DTO 进行转换
+        ScoringResult scoringResult = new ScoringResult();
+        BeanUtils.copyProperties(scoringResultEditRequest, scoringResult);
+        scoringResult.setAppId(oldScoringResult.getAppId());
+        scoringResult.setResultProp(JSONUtil.toJsonStr(scoringResultEditRequest.getResultProp()));
+        // 数据校验
+        scoringResultService.validScoringResult(scoringResult, false);
+        User loginUser = userService.getLoginUser(request);
         // 仅本人或管理员可编辑
         if (!oldScoringResult.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);

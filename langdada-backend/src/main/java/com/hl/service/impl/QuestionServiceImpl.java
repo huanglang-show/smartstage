@@ -13,12 +13,12 @@ import com.hl.mapper.QuestionMapper;
 import com.hl.model.dto.question.QuestionAddRequest;
 import com.hl.model.dto.question.QuestionFrameWork;
 import com.hl.model.dto.question.QuestionQueryRequest;
+import com.hl.model.entity.*;
 import com.hl.model.entity.Question;
 import com.hl.model.entity.Question;
-import com.hl.model.entity.Question;
-import com.hl.model.entity.User;
 import com.hl.model.vo.QuestionVO;
 import com.hl.model.vo.UserVO;
+import com.hl.service.AppService;
 import com.hl.service.QuestionService;
 import com.hl.service.UserService;
 import com.hl.utils.SqlUtils;
@@ -49,6 +49,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     @Resource
     private UserService userService;
 
+    @Resource
+    private AppService appService;
     /**
      * 校验数据
      *
@@ -66,6 +68,9 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             ThrowUtils.throwIf(StringUtils.isBlank(questionContent), ErrorCode.PARAMS_ERROR);
             ThrowUtils.throwIf(appId == null, ErrorCode.PARAMS_ERROR);
         }
+        // 校验app是否存在，并且状态为可用
+        App app = appService.getById(appId);
+        ThrowUtils.throwIf(app == null || app.getIsDelete() == 1, ErrorCode.PARAMS_ERROR, "应用不存在，无法创建或编辑问题");
     }
 
     @Override
@@ -97,7 +102,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         if (questionQueryRequest == null) {
             return queryWrapper;
         }
-        // todo 从对象中取值
+        // 从对象中取值
         Long id = questionQueryRequest.getId();
         String sortField = questionQueryRequest.getSortField();
         String sortOrder = questionQueryRequest.getSortOrder();
@@ -110,6 +115,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         queryWrapper.eq(ObjectUtils.isNotEmpty(id), "id", id);
         queryWrapper.eq(ObjectUtils.isNotEmpty(appId), "appId", appId);
         queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "userId", userId);
+        queryWrapper.eq("isDelete",0);
         // 排序规则
         queryWrapper.orderBy(SqlUtils.validSortField(sortField),
                 sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
@@ -144,8 +150,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
      * 分页获取题目封装
      *
      * @param questionPage page
-     * @param request
-     * @return
+     * @param request   request
+     * @return page
      */
     @Override
     public Page<QuestionVO> getQuestionVOPage(Page<Question> questionPage, HttpServletRequest request) {
@@ -157,7 +163,6 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         // 对象列表 => 封装对象列表
         List<QuestionVO> questionVOList = questionList.stream().map(QuestionVO::objToVo).collect(Collectors.toList());
 
-        // todo 可以根据需要为封装对象补充值，不需要的内容可以删除
         // 1. 关联查询用户信息
         Set<Long> userIdSet = questionList.stream().map(Question::getUserId).collect(Collectors.toSet());
         Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
