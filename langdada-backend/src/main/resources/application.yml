@@ -74,7 +74,7 @@ wx:
       type: Memory
   # 微信开放平台
   open:
-    appId: xxx
+    appId: wxd2e2c7e7e2ebaa8b
     appSecret: xxx
 # 对象存储
 cos:
