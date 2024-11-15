@@ -1,6 +1,8 @@
 import { RouteRecordRaw } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
-import UserLayout from "@/layouts/UserLayout.vue";
+import UserLoginView from "@/views/user/UserLoginView.vue";
+import UserRegisterView from "@/views/user/UserRegisterView.vue";
+import UserUpdateView from "@/views/user/UserUpdateView.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -9,9 +11,25 @@ const routes: Array<RouteRecordRaw> = [
     component: HomeView,
   },
   {
-    path: "/user",
-    name: "user",
-    component: UserLayout,
+    path: "/user/login",
+    name: "userLogin",
+    component: UserLoginView,
+    meta: {
+      hideInMenu: true,
+    },
+  },
+  {
+    path: "/user/register",
+    name: "userRegister",
+    component: UserRegisterView,
+    meta: {
+      hideInMenu: true,
+    },
+  },
+  {
+    path: "/update/user",
+    name: "updateUser",
+    component: UserUpdateView,
     meta: {
       hideInMenu: true,
     },

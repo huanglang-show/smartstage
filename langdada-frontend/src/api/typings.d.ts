@@ -606,6 +606,8 @@ declare namespace API {
     userAvatar?: string;
     userName?: string;
     userProfile?: string;
+    userPassword?: string;
+    checkPassword?: string;
   };
 
   type UserUpdateRequest = {
