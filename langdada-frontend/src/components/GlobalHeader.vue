@@ -43,15 +43,20 @@ import routers from "@/router/routers";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useLoginUserStore } from "@/store/userStore";
+import checkAccess from "@/access/checkAccess";
 
 const router = useRouter();
 // 获取登录用户信息
 const loginUserStore = useLoginUserStore();
+const loginUser = loginUserStore.loginUser;
 
 // 过滤掉不需要在头部显示的路由
 const showRouters = computed(() => {
   return routers.filter((item) => {
-    if (item.meta && !item.meta.showInHeader) {
+    if (item.meta && item.meta.hideInMenu) {
+      return false;
+    }
+    if(!checkAccess(loginUser, item.meta?.access as string)) {
       return false;
     }
     return true;
