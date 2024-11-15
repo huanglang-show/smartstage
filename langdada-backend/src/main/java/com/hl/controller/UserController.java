@@ -31,6 +31,7 @@ import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
 import me.chanjar.weixin.mp.api.WxMpService;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -288,12 +289,34 @@ public class UserController {
         if (userUpdateMyRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        String userPassword = validNewPassword(userUpdateMyRequest);
         User loginUser = userService.getLoginUser(request);
         User user = new User();
         BeanUtils.copyProperties(userUpdateMyRequest, user);
         user.setId(loginUser.getId());
+        if(StringUtils.isNotBlank(userPassword)){
+            // 2. 加密
+            String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+            user.setUserPassword(encryptPassword);
+        }
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
+    }
+
+    @Nullable
+    private static String validNewPassword(UserUpdateMyRequest userUpdateMyRequest) {
+        String userPassword = userUpdateMyRequest.getUserPassword();
+        String checkPassword = userUpdateMyRequest.getCheckPassword();
+        if(StringUtils.isNotBlank(checkPassword) && StringUtils.isNotBlank(checkPassword)){
+            if (userPassword.length() < 8 || checkPassword.length() < 8) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户密码过短");
+            }
+            // 密码和校验密码相同
+            if (!userPassword.equals(checkPassword)) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次输入的密码不一致");
+            }
+        }
+        return userPassword;
     }
 }
