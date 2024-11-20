@@ -12,7 +12,6 @@ router.beforeEach((to, from, next) => {
   const loginUser = userLoginStore.loginUser;
   // 页面需要的权限
   const needAccess = (to.meta?.access as string) ?? ACCESS_ENUM.NOT_LOGIN;
-  console.log("1"+loginUser+needAccess);
   // 需要登录的页面
   if (needAccess !== ACCESS_ENUM.NOT_LOGIN) {
     // 如果当前登录用户信息不存在，则跳转到登录页面

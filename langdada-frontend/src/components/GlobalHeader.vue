@@ -56,7 +56,7 @@ const showRouters = computed(() => {
     if (item.meta && item.meta.hideInMenu) {
       return false;
     }
-    if(!checkAccess(loginUser, item.meta?.access as string)) {
+    if (!checkAccess(loginUser, item.meta?.access as string)) {
       return false;
     }
     return true;

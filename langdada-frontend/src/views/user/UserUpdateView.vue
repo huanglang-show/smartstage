@@ -9,7 +9,11 @@
         <a-input v-model="updateForm.userName" placeholder="请输入用户名" />
       </a-form-item>
       <a-form-item field="userAvatar" label="头像">
-        <a-input v-model="updateForm.userAvatar" placeholder="请上传头像" />
+        <picture-upload
+          biz="user_avatar"
+          :on-change="uploadAvatar"
+          :value="updateForm.userAvatar"
+        />
       </a-form-item>
       <a-form-item field="userProfile" label="个人简介">
         <a-input
@@ -39,15 +43,13 @@
   </div>
 </template>
 <script setup lang="ts">
-import { reactive } from "vue";
-import {
-  getUserVoByIdUsingGet,
-  updateMyUserUsingPost,
-} from "@/api/userController";
+import { reactive, ref } from "vue";
+import { updateMyUserUsingPost } from "@/api/userController";
 import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
 import { useLoginUserStore } from "@/store/userStore";
 import UserUpdateMyRequest = API.UserUpdateMyRequest;
+import PictureUpload from "@/components/PictureUpload.vue";
 
 const router = useRouter();
 // 全局用户存储store
@@ -65,6 +67,12 @@ const updateForm: UserUpdateMyRequest = reactive({
 });
 // 从用户态中获取当前用户信息
 Object.assign(updateForm, userStore.loginUser);
+
+const avatarUrl = ref("");
+const uploadAvatar = (url: string) => {
+  avatarUrl.value = url;
+  updateForm.userAvatar = url;
+};
 
 const handleSubmit = async () => {
   if (updateForm.userPassword !== updateForm.checkPassword) {
