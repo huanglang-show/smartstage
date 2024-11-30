@@ -307,14 +307,9 @@ declare namespace API {
   };
 
   type PageUser_ = {
-    countId?: string;
     current?: number;
-    maxLimit?: number;
-    optimizeCountSql?: boolean;
-    orders?: OrderItem[];
     pages?: number;
     records?: User[];
-    searchCount?: boolean;
     size?: number;
     total?: number;
   };
@@ -616,6 +611,7 @@ declare namespace API {
     userName?: string;
     userProfile?: string;
     userRole?: string;
+    userPassword?: string;
   };
 
   type UserVO = {
@@ -627,3 +623,4 @@ declare namespace API {
     userRole?: string;
   };
 }
+export default API;

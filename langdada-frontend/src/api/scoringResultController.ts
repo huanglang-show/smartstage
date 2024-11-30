@@ -1,6 +1,7 @@
 // @ts-ignore
 /* eslint-disable */
 import request from "@/request";
+import API from "@/api/typings";
 
 /** addScoringResult POST /api/scoringResult/add */
 export async function addScoringResultUsingPost(

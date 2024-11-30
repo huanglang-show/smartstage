@@ -5,6 +5,10 @@ import UserRegisterView from "@/views/user/UserRegisterView.vue";
 import UserUpdateView from "@/views/user/UserUpdateView.vue";
 import component from "*.vue";
 import NoAuth from "@/views/NoAuth.vue";
+import UserLayout from "@/layouts/UserLayout.vue";
+import BasicLayout from "@/layouts/BasicLayout.vue";
+import AdminUserView from "@/views/admin/AdminUserView.vue";
+import AdminAppView from "@/views/admin/AdminAppView.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -16,19 +20,39 @@ const routes: Array<RouteRecordRaw> = [
     },
   },
   {
-    path: "/user/login",
-    name: "userLogin",
-    component: UserLoginView,
+    path: "/user",
+    name: "用户",
+    component: UserLayout,
+    children: [
+      {
+        path: "/user/login",
+        name: "用户登录",
+        component: UserLoginView,
+      },
+      {
+        path: "/user/register",
+        name: "用户注册",
+        component: UserRegisterView,
+      },
+    ],
     meta: {
       hideInMenu: true,
     },
   },
   {
-    path: "/user/register",
-    name: "userRegister",
-    component: UserRegisterView,
+    path: "/admin/user",
+    name: "用户管理",
+    component: AdminUserView,
     meta: {
-      hideInMenu: true,
+      access: "admin",
+    },
+  },
+  {
+    path: "/admin/app",
+    name: "应用管理",
+    component: AdminAppView,
+    meta: {
+      access: "admin",
     },
   },
   {
@@ -45,9 +69,7 @@ const routes: Array<RouteRecordRaw> = [
     name: "about",
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
-    meta: {
-      access: "admin",
-    },
+    meta: {},
   },
   {
     path: "/noAuth",

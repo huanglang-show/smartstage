@@ -99,7 +99,6 @@ const customRequest = async (option: any) => {
     };
     props.onChange?.(url);
     onSuccess();
-    console.log(file.value);
   } else {
     Message.error("上传失败，" + res.data.message || "");
     onError(new Error(res.data.message));

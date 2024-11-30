@@ -1,6 +1,7 @@
 // @ts-ignore
 /* eslint-disable */
 import request from "@/request";
+import API from "@/api/typings";
 
 /** 创建应用 POST /api/app/add */
 export async function addAppUsingPost(

@@ -1,6 +1,6 @@
 <template>
   <template v-if="route.path.startsWith('/user')">
-    <UserLayout />
+    <router-view />
   </template>
   <template v-else>
     <BasicLayout />

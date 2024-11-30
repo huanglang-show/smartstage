@@ -1,6 +1,7 @@
 // @ts-ignore
 /* eslint-disable */
 import request from "@/request";
+import API from "@/api/typings"
 
 /** addUserAnswer POST /api/userAnswer/add */
 export async function addUserAnswerUsingPost(

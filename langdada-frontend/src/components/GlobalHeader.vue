@@ -21,14 +21,14 @@
         </a-menu-item>
       </a-menu>
     </a-col>
-    <a-col flex="100px">
+    <a-col flex="100px" >
       <a-dropdown-button>
-        <template v-if="loginUserStore.loginUser.id">
+        <div v-if="loginUserStore.loginUser.id" >
           {{ loginUserStore.loginUser.userName ?? "无名用户" }}
-        </template>
-        <template v-else>
-          <a-button type="primary" href="/user/login">登录</a-button>
-        </template>
+        </div>
+        <div v-else @click="goToLogin" >
+          登录
+        </div>
         <template #content>
           <a-doption @click="updateUser"> 个人中心</a-doption>
           <a-doption @click="logOut"> logOut</a-doption>
@@ -64,13 +64,22 @@ const showRouters = computed(() => {
 });
 // 根据路由切换选中的菜单
 const selectKey = ref(["/"]);
+const menuPaths = showRouters.value.map((i) => i.path);
 router.afterEach((to) => {
-  selectKey.value = [to.path];
+  if(menuPaths.includes(to.path)){
+    selectKey.value = [to.path];
+  }else {
+    selectKey.value = [""];
+  }
 });
 
 const doMenuClick = (key: string) => {
   router.push(key);
 };
+
+const goToLogin = () => {
+  router.push("/user/login");
+}
 const logOut = () => {
   loginUserStore.setLoginUser({});
   router.push("/user/login");
