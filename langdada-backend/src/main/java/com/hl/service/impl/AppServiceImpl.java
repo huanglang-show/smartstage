@@ -18,6 +18,7 @@ import com.hl.model.dto.app.AppQueryRequest;
 import com.hl.model.dto.app.AppUpdateRequest;
 import com.hl.model.entity.App;
 import com.hl.model.entity.Question;
+import com.hl.model.entity.ScoringResult;
 import com.hl.model.entity.User;
 import com.hl.model.vo.AppVO;
 import com.hl.model.vo.QuestionVO;
@@ -203,6 +204,24 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         List<App> records = page.getRecords();
         List<AppVO> appVOList = records.stream().map(AppVO::objToVo).collect(Collectors.toList());
         Page<AppVO> appVOPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
+
+        // 关联查询用户信息
+        Set<Long> userIdSet = records.stream().map(App::getUserId).collect(Collectors.toSet());
+        userIdSet.addAll(records.stream().map(App::getReviewerId).collect(Collectors.toSet()));
+        Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
+                .collect(Collectors.groupingBy(User::getId));
+        // 填充信息
+        appVOList.forEach(appVO -> {
+            Long userId = appVO.getUserId();
+            User user = null;
+            if (userIdUserListMap.containsKey(userId)) {
+                user = userIdUserListMap.get(userId).get(0);
+                appVO.setUser(userService.getUserVO(user));
+            }
+            if(userIdUserListMap.containsKey(appVO.getReviewerId())){
+                appVO.setReviewerName(userIdUserListMap.get(appVO.getReviewerId()).get(0).getUserName());
+            }
+        });
         appVOPage.setRecords(appVOList);
         return appVOPage;
     }
