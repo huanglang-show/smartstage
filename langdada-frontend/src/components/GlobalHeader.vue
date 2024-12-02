@@ -21,14 +21,12 @@
         </a-menu-item>
       </a-menu>
     </a-col>
-    <a-col flex="100px" >
+    <a-col flex="100px">
       <a-dropdown-button>
-        <div v-if="loginUserStore.loginUser.id" >
+        <div v-if="loginUserStore.loginUser.id">
           {{ loginUserStore.loginUser.userName ?? "无名用户" }}
         </div>
-        <div v-else @click="goToLogin" >
-          登录
-        </div>
+        <div v-else @click="goToLogin">登录</div>
         <template #content>
           <a-doption @click="updateUser"> 个人中心</a-doption>
           <a-doption @click="logOut"> logOut</a-doption>
@@ -40,12 +38,13 @@
 
 <script setup lang="ts">
 import routers from "@/router/routers";
-import { computed, ref } from "vue";
-import { useRouter } from "vue-router";
+import { computed, onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useLoginUserStore } from "@/store/userStore";
 import checkAccess from "@/access/checkAccess";
 
 const router = useRouter();
+const route = useRoute();
 // 获取登录用户信息
 const loginUserStore = useLoginUserStore();
 const loginUser = loginUserStore.loginUser;
@@ -62,13 +61,13 @@ const showRouters = computed(() => {
     return true;
   });
 });
-// 根据路由切换选中的菜单
-const selectKey = ref(["/"]);
+// 根据路由切换选中的菜单,默认为当前路由菜单
+const selectKey = ref([route.path]);
 const menuPaths = showRouters.value.map((i) => i.path);
 router.afterEach((to) => {
-  if(menuPaths.includes(to.path)){
+  if (menuPaths.includes(to.path)) {
     selectKey.value = [to.path];
-  }else {
+  } else {
     selectKey.value = [""];
   }
 });
@@ -79,7 +78,7 @@ const doMenuClick = (key: string) => {
 
 const goToLogin = () => {
   router.push("/user/login");
-}
+};
 const logOut = () => {
   loginUserStore.setLoginUser({});
   router.push("/user/login");

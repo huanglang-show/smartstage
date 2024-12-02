@@ -3,16 +3,14 @@ import HomeView from "@/views/HomeView.vue";
 import UserLoginView from "@/views/user/UserLoginView.vue";
 import UserRegisterView from "@/views/user/UserRegisterView.vue";
 import UserUpdateView from "@/views/user/UserUpdateView.vue";
-import component from "*.vue";
 import NoAuth from "@/views/NoAuth.vue";
 import UserLayout from "@/layouts/UserLayout.vue";
-import BasicLayout from "@/layouts/BasicLayout.vue";
 import AdminUserView from "@/views/admin/AdminUserView.vue";
 import AdminAppView from "@/views/admin/AdminAppView.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: "/",
+    path: "/home",
     name: "home",
     component: HomeView,
     meta: {
