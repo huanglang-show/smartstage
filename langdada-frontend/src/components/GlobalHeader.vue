@@ -62,7 +62,10 @@ const showRouters = computed(() => {
   });
 });
 // 根据路由切换选中的菜单,默认为当前路由菜单
-const selectKey = ref([route.path]);
+const selectKey = ref(["/home"]);
+if (loginUser) {
+  router.push(selectKey.value[0]);
+}
 const menuPaths = showRouters.value.map((i) => i.path);
 router.afterEach((to) => {
   if (menuPaths.includes(to.path)) {

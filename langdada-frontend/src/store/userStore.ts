@@ -21,7 +21,11 @@ export const useLoginUserStore = defineStore(
       loginUser.value = newLoginUser;
     }
 
-    return { loginUser, setLoginUser, fetchLoginUser };
+    function deleteLoginUser() {
+      loginUser.value = {};
+    }
+
+    return { loginUser, setLoginUser, fetchLoginUser, deleteLoginUser };
   },
   {
     // 持久化配置

@@ -1,27 +1,27 @@
 <template>
-  <div id="adminUser">
+  <div id="adminQuestion">
     <a-form
-      :model="formSearchParams"
-      :style="{ marginBottom: '20px' }"
       layout="inline"
-      @submit="doSearch"
+      :model="fromSearchParams"
+      @submit="doSerach"
+      :style="{ marginBottom: '20px' }"
     >
-      <a-form-item field="userName" label="用户名">
+      <a-form-item label="题目id" field="id">
         <a-input
-          v-model="formSearchParams.userName"
-          placeholder="请输入用户名"
+          v-model="fromSearchParams.userId"
+          placeholder="请输入用户id"
           allow-clear
         />
       </a-form-item>
-      <a-form-item field="userProfile" label="用户简介">
+      <a-form-item label="题目内容" field="questionContent">
         <a-input
-          v-model="formSearchParams.userProfile"
-          placeholder="请输入用户简介"
+          v-model="fromSearchParams.questionContent"
+          placeholder="请输入题目内容"
           allow-clear
         />
       </a-form-item>
       <a-form-item>
-        <a-button type="primary" html-type="submit">搜索</a-button>
+        <a-button html-type="submit" type="primary">搜索</a-button>
       </a-form-item>
     </a-form>
     <a-table
@@ -38,49 +38,51 @@
       <template #index="{ rowIndex }">
         {{ rowIndex + 1 }}
       </template>
-      <template #userAvatar="{ record }">
-        <!--        <a-image width="64" :src="record.userAvatar" />-->
-        <!--        写死用于测试-->
-        <img width="40px" src="../../../public/labi.jpeg" alt="logo" />
+
+      <template #content="{ record }">
+        <md-view :value="record.questionContent" />
       </template>
       <template #optional="{ record }">
         <a-space>
-          <a-button type="secondary" @click="doUpdate(record)">修改</a-button>
+          <a-button type="secondary" @click="doUpdate(record)" disabled
+            >修改
+          </a-button>
           <a-button status="danger" @click="doDelete(record.id)">删除</a-button>
         </a-space>
       </template>
     </a-table>
 
     <!--    修改模态框-->
-    <admin-update-user-modal-view
+    <admin-update-app-modal-view
       :is-modal-visible="isModalVisible"
-      :user-data="selectRecord"
-      @handleUpdateUser="handleUpdateUser"
+      :question-data="selectRecord"
+      @handleUpdateQuestion="handleUpdateQuestion"
       @cancelModal="cancelModal"
     />
   </div>
 </template>
 <script setup lang="ts">
 import { ref, watchEffect } from "vue";
-import {
-  deleteUserUsingPost,
-  listUserByPageUsingPost,
-  updateUserUsingPost,
-} from "@/api/userController";
 import API from "@/api/typings";
-import AdminUpdateUserModalView from "@/views/admin/AdminUpdateUserModalView.vue";
 import message from "@arco-design/web-vue/es/message";
+import AdminUpdateAppModalView from "@/views/admin/AdminUpdateAppModalView.vue";
+import {
+  deleteQuestionUsingPost,
+  editQuestionUsingPost,
+  listQuestionByPageUsingPost,
+} from "@/api/questionController";
+import MdView from "@/components/MdView.vue";
 
 // 模态框展示与否
 const isModalVisible = ref(false);
 // 当前选中记录
-const selectRecord = ref<API.User | null>(null);
+const selectRecord = ref<API.QuestionVO | null>(null);
 
 // 数据总条数
 const total = ref(0);
-const dataList = ref<API.User[]>([]);
+const dataList = ref<API.QuestionVO[]>([]);
 
-const formSearchParams = ref<API.UserQueryRequest>({});
+const fromSearchParams = ref<API.QuestionQueryRequest>({});
 /**
  * 初始化搜索分页条件
  */
@@ -88,7 +90,7 @@ const initSearchParams = ref({
   pageSize: 10,
   current: 1,
 });
-const searchParams = ref<API.UserQueryRequest>({
+const searchParams = ref<API.QuestionQueryRequest>({
   ...initSearchParams.value,
 });
 
@@ -96,7 +98,7 @@ const searchParams = ref<API.UserQueryRequest>({
  * 加载数据
  */
 const loadData = async () => {
-  await listUserByPageUsingPost(searchParams.value).then((res) => {
+  await listQuestionByPageUsingPost(searchParams.value).then((res) => {
     if (res.data.code === 0 && res.data.data) {
       dataList.value = res.data.data?.records || [];
       total.value = res.data.data?.total || 0;
@@ -104,22 +106,23 @@ const loadData = async () => {
   });
 };
 
-/**
- * 执行搜索
- */
-const doSearch = () => {
+const doSerach = () => {
   searchParams.value = {
-    ...initSearchParams,
-    ...formSearchParams.value,
+    ...searchParams.value,
+    ...fromSearchParams.value,
   };
 };
+
+watchEffect(() => {
+  loadData();
+});
 
 /**
  * 删除
  * @param id
  */
 const doDelete = async (id: number) => {
-  await deleteUserUsingPost({ id }).then((res) => {
+  await deleteQuestionUsingPost({ id }).then((res) => {
     if (res.data.code === 0) {
       loadData();
     }
@@ -130,12 +133,14 @@ const doDelete = async (id: number) => {
  * 修改
  * @param record
  */
-const doUpdate = (record: API.User) => {
+const doUpdate = (record: API.QuestionVO) => {
   selectRecord.value = record;
   isModalVisible.value = true;
 };
-const handleUpdateUser = async (updateUser: API.User) => {
-  await updateUserUsingPost(updateUser).then((res) => {
+const handleUpdateQuestion = async (
+  updateQuestion: API.QuestionEditRequest
+) => {
+  await editQuestionUsingPost(updateQuestion).then((res) => {
     if (res.data.code === 0) {
       message.success("修改成功");
       isModalVisible.value = false;
@@ -162,7 +167,6 @@ const onPageChange = (page: number) => {
 };
 
 // 防抖函数
-// eslint-disable-next-line @typescript-eslint/ban-types
 function debounce(fn: Function, delay: number) {
   let timer: NodeJS.Timeout | null = null;
   return function (...args: any[]) {
@@ -179,11 +183,7 @@ const debouncedLoadData = debounce(loadData, 300);
  * 监听 searchParams 变量，改变时触发数据的重新加载
  */
 watchEffect(() => {
-  // 调用防抖延迟函数时，需要显示监听searchParams.value的变化，才会触发
-  const params = searchParams.value;
   debouncedLoadData();
-  // 不延迟时，直接调用加载函数即可刷新
-  // loadData();
 });
 
 /**
@@ -202,25 +202,9 @@ const columns = [
     slotName: "index",
   },
   {
-    title: "账号",
-    dataIndex: "userAccount",
-  },
-  {
-    title: "用户名",
-    dataIndex: "userName",
-  },
-  {
-    title: "用户头像",
-    dataIndex: "userAvatar",
-    slotName: "userAvatar",
-  },
-  {
-    title: "用户简介",
-    dataIndex: "userProfile",
-  },
-  {
-    title: "权限",
-    dataIndex: "userRole",
+    title: "内容",
+    dataIndex: "content",
+    slotName: "content",
   },
   {
     title: "创建时间",
@@ -238,7 +222,4 @@ const columns = [
   },
 ];
 </script>
-<style scoped>
-#adminUser {
-}
-</style>
+<style scoped></style>

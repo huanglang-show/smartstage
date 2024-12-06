@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Message } from "@arco-design/web-vue";
+import { useLoginUserStore } from "@/store/userStore";
 
 const myAxios = axios.create({
   baseURL: "http://localhost:8101",
@@ -23,18 +24,25 @@ myAxios.interceptors.request.use(
 // 添加响应拦截器
 myAxios.interceptors.response.use(
   function (response) {
+    // 获取用户态
+    const loginUserStore = useLoginUserStore();
     // 获取响应数据
     const { data } = response;
     if (data.code === 40100) {
       // 不是请求用户信息的页面，并且当前不是登录页，则跳转到登陆页面
       if (
-        response.request.responseURL.includes("/user/get/login") &&
+        !response.request.responseURL.includes("/user/get/login") &&
         !window.location.pathname.includes("/login")
       ) {
         Message.warning("未登录，请重新登录");
+        loginUserStore.deleteLoginUser();
         window.location.href = "/user/login?direct=${window.location.href}";
       }
     }
+    if (data.code !== 0) {
+      Message.error(data.message);
+    }
+
     return response;
   },
   function (error) {

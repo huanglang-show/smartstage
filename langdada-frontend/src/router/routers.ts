@@ -7,6 +7,9 @@ import NoAuth from "@/views/NoAuth.vue";
 import UserLayout from "@/layouts/UserLayout.vue";
 import AdminUserView from "@/views/admin/AdminUserView.vue";
 import AdminAppView from "@/views/admin/AdminAppView.vue";
+import AdminQuestionView from "@/views/admin/AdminQuestionView.vue";
+import AdminScoringView from "@/views/admin/AdminScoringView.vue";
+import AdminAnswerView from "@/views/admin/AdminAnswerView.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -49,6 +52,30 @@ const routes: Array<RouteRecordRaw> = [
     path: "/admin/app",
     name: "应用管理",
     component: AdminAppView,
+    meta: {
+      access: "admin",
+    },
+  },
+  {
+    path: "/admin/question",
+    name: "问题管理",
+    component: AdminQuestionView,
+    meta: {
+      access: "admin",
+    },
+  },
+  {
+    path: "/admin/scoring",
+    name: "得分管理",
+    component: AdminScoringView,
+    meta: {
+      access: "admin",
+    },
+  },
+  {
+    path: "/admin/Answer",
+    name: "回答管理",
+    component: AdminAnswerView,
     meta: {
       access: "admin",
     },

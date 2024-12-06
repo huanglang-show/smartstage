@@ -1,27 +1,41 @@
 <template>
-  <div id="adminUser">
+  <div id="adminScoring">
     <a-form
-      :model="formSearchParams"
-      :style="{ marginBottom: '20px' }"
       layout="inline"
-      @submit="doSearch"
+      :model="fromSearchParams"
+      @submit="doSerach"
+      :style="{ marginBottom: '10px' }"
     >
-      <a-form-item field="userName" label="用户名">
+      <a-form-item label="题目id" field="id">
         <a-input
-          v-model="formSearchParams.userName"
-          placeholder="请输入用户名"
+          v-model="fromSearchParams.userId"
+          placeholder="请输入用户id"
           allow-clear
         />
       </a-form-item>
-      <a-form-item field="userProfile" label="用户简介">
+      <a-form-item label="应用id" field="appId">
         <a-input
-          v-model="formSearchParams.userProfile"
-          placeholder="请输入用户简介"
+          v-model="fromSearchParams.appId"
+          placeholder="请输入应用id"
+          allow-clear
+        />
+      </a-form-item>
+      <a-form-item label="结果名称" field="resultName">
+        <a-input
+          v-model="fromSearchParams.resultName"
+          placeholder="请输入结果名称"
+          allow-clear
+        />
+      </a-form-item>
+      <a-form-item label="结果描述" field="resultProp">
+        <a-input
+          v-model="fromSearchParams.resultProp"
+          placeholder="请输入结果描述"
           allow-clear
         />
       </a-form-item>
       <a-form-item>
-        <a-button type="primary" html-type="submit">搜索</a-button>
+        <a-button html-type="submit" type="primary">搜索</a-button>
       </a-form-item>
     </a-form>
     <a-table
@@ -38,49 +52,64 @@
       <template #index="{ rowIndex }">
         {{ rowIndex + 1 }}
       </template>
-      <template #userAvatar="{ record }">
-        <!--        <a-image width="64" :src="record.userAvatar" />-->
-        <!--        写死用于测试-->
-        <img width="40px" src="../../../public/labi.jpeg" alt="logo" />
+
+      <template #content="{ record }">
+        <md-view :value="record.questionContent" />
+      </template>
+      <template #resultPicture="{ record }">
+        <img
+          alt="logo"
+          src="../../../public/labi.jpeg"
+          width="50"
+          height="50"
+        />
       </template>
       <template #optional="{ record }">
         <a-space>
-          <a-button type="secondary" @click="doUpdate(record)">修改</a-button>
+          <a-button type="secondary" @click="doUpdate(record)" disabled
+            >修改
+          </a-button>
           <a-button status="danger" @click="doDelete(record.id)">删除</a-button>
         </a-space>
       </template>
     </a-table>
 
     <!--    修改模态框-->
-    <admin-update-user-modal-view
+    <admin-update-app-modal-view
       :is-modal-visible="isModalVisible"
-      :user-data="selectRecord"
-      @handleUpdateUser="handleUpdateUser"
+      :question-data="selectRecord"
+      @handleUpdateQuestion="handleUpdateScoring"
       @cancelModal="cancelModal"
     />
   </div>
 </template>
 <script setup lang="ts">
 import { ref, watchEffect } from "vue";
-import {
-  deleteUserUsingPost,
-  listUserByPageUsingPost,
-  updateUserUsingPost,
-} from "@/api/userController";
 import API from "@/api/typings";
-import AdminUpdateUserModalView from "@/views/admin/AdminUpdateUserModalView.vue";
 import message from "@arco-design/web-vue/es/message";
+import AdminUpdateAppModalView from "@/views/admin/AdminUpdateAppModalView.vue";
+import {
+  deleteQuestionUsingPost,
+  editQuestionUsingPost,
+  listQuestionByPageUsingPost,
+} from "@/api/questionController";
+import MdView from "@/components/MdView.vue";
+import {
+  deleteScoringResultUsingPost,
+  editScoringResultUsingPost,
+  listScoringResultByPageUsingPost,
+} from "@/api/scoringResultController";
 
 // 模态框展示与否
 const isModalVisible = ref(false);
 // 当前选中记录
-const selectRecord = ref<API.User | null>(null);
+const selectRecord = ref<API.ScoringResultVO | null>(null);
 
 // 数据总条数
 const total = ref(0);
-const dataList = ref<API.User[]>([]);
+const dataList = ref<API.ScoringResult[]>([]);
 
-const formSearchParams = ref<API.UserQueryRequest>({});
+const fromSearchParams = ref<API.ScoringResultQueryRequest>({});
 /**
  * 初始化搜索分页条件
  */
@@ -88,7 +117,7 @@ const initSearchParams = ref({
   pageSize: 10,
   current: 1,
 });
-const searchParams = ref<API.UserQueryRequest>({
+const searchParams = ref<API.ScoringResultQueryRequest>({
   ...initSearchParams.value,
 });
 
@@ -96,7 +125,7 @@ const searchParams = ref<API.UserQueryRequest>({
  * 加载数据
  */
 const loadData = async () => {
-  await listUserByPageUsingPost(searchParams.value).then((res) => {
+  await listScoringResultByPageUsingPost(searchParams.value).then((res) => {
     if (res.data.code === 0 && res.data.data) {
       dataList.value = res.data.data?.records || [];
       total.value = res.data.data?.total || 0;
@@ -104,22 +133,23 @@ const loadData = async () => {
   });
 };
 
-/**
- * 执行搜索
- */
-const doSearch = () => {
+const doSerach = () => {
   searchParams.value = {
-    ...initSearchParams,
-    ...formSearchParams.value,
+    ...searchParams.value,
+    ...fromSearchParams.value,
   };
 };
+
+watchEffect(() => {
+  loadData();
+});
 
 /**
  * 删除
  * @param id
  */
 const doDelete = async (id: number) => {
-  await deleteUserUsingPost({ id }).then((res) => {
+  await deleteScoringResultUsingPost({ id }).then((res) => {
     if (res.data.code === 0) {
       loadData();
     }
@@ -130,12 +160,14 @@ const doDelete = async (id: number) => {
  * 修改
  * @param record
  */
-const doUpdate = (record: API.User) => {
+const doUpdate = (record: API.ScoringResultVO) => {
   selectRecord.value = record;
   isModalVisible.value = true;
 };
-const handleUpdateUser = async (updateUser: API.User) => {
-  await updateUserUsingPost(updateUser).then((res) => {
+const handleUpdateScoring = async (
+  updateScoring: API.ScoringResultEditRequest
+) => {
+  await editScoringResultUsingPost(updateScoring).then((res) => {
     if (res.data.code === 0) {
       message.success("修改成功");
       isModalVisible.value = false;
@@ -162,7 +194,6 @@ const onPageChange = (page: number) => {
 };
 
 // 防抖函数
-// eslint-disable-next-line @typescript-eslint/ban-types
 function debounce(fn: Function, delay: number) {
   let timer: NodeJS.Timeout | null = null;
   return function (...args: any[]) {
@@ -179,11 +210,7 @@ const debouncedLoadData = debounce(loadData, 300);
  * 监听 searchParams 变量，改变时触发数据的重新加载
  */
 watchEffect(() => {
-  // 调用防抖延迟函数时，需要显示监听searchParams.value的变化，才会触发
-  const params = searchParams.value;
   debouncedLoadData();
-  // 不延迟时，直接调用加载函数即可刷新
-  // loadData();
 });
 
 /**
@@ -202,25 +229,29 @@ const columns = [
     slotName: "index",
   },
   {
-    title: "账号",
-    dataIndex: "userAccount",
+    title: "结果名称",
+    dataIndex: "resultName",
+    slotName: "resultName",
   },
   {
-    title: "用户名",
-    dataIndex: "userName",
+    title: "结果描述",
+    dataIndex: "resultDesc",
+    slotName: "resultDesc",
   },
   {
-    title: "用户头像",
-    dataIndex: "userAvatar",
-    slotName: "userAvatar",
+    title: "结果图片",
+    dataIndex: "resultPicture",
+    slotName: "resultPicture",
   },
   {
-    title: "用户简介",
-    dataIndex: "userProfile",
+    title: "结果属性",
+    dataIndex: "resultProp",
+    slotName: "resultProp",
   },
   {
-    title: "权限",
-    dataIndex: "userRole",
+    title: "结果得分",
+    dataIndex: "resultScoreRange",
+    slotName: "resultScoreRange",
   },
   {
     title: "创建时间",
@@ -238,7 +269,4 @@ const columns = [
   },
 ];
 </script>
-<style scoped>
-#adminUser {
-}
-</style>
+<style scoped></style>

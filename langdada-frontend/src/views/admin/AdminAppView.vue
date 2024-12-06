@@ -1,5 +1,36 @@
 <template>
   <div id="adminApp">
+    <a-form
+      layout="inline"
+      :model="fromSearchParams"
+      @submit="doSerach"
+      :style="{ marginBottom: '20px' }"
+    >
+      <a-form-item label="应用id" field="id">
+        <a-input
+          v-model="fromSearchParams.userId"
+          placeholder="请输入应用id"
+          allow-clear
+        />
+      </a-form-item>
+      <a-form-item label="应用名称" field="appName">
+        <a-input
+          v-model="fromSearchParams.appName"
+          placeholder="请输入应用名称"
+          allow-clear
+        />
+      </a-form-item>
+      <a-form-item label="应用类型" field="appType">
+        <a-input
+          v-model="fromSearchParams.appType"
+          placeholder="请输入应用类型"
+          allow-clear
+        />
+      </a-form-item>
+      <a-form-item>
+        <a-button html-type="submit" type="primary">搜索</a-button>
+      </a-form-item>
+    </a-form>
     <a-table
       :columns="columns"
       :data="dataList"
@@ -38,6 +69,30 @@
 
       <template #optional="{ record }">
         <a-space>
+          <a-dropdown :popup-max-height="false">
+            <a-button
+              >审核
+              <icon-down />
+            </a-button>
+            <template #content>
+              <a-doption
+                @click="
+                  doReview(record, REVIEW_STATUS_ENUM.PASS, '符合上架要求')
+                "
+                >通过
+              </a-doption>
+              <a-doption
+                @click="
+                  doReview(
+                    record,
+                    REVIEW_STATUS_ENUM.REJECT,
+                    '不符合上架要求！'
+                  )
+                "
+                >拒绝
+              </a-doption>
+            </template>
+          </a-dropdown>
           <a-button type="secondary" @click="doUpdate(record)">修改</a-button>
           <a-button status="danger" @click="doDelete(record.id)">删除</a-button>
         </a-space>
@@ -45,25 +100,26 @@
     </a-table>
 
     <!--    修改模态框-->
-    <admin-update-user-modal-view
+    <admin-update-app-modal-view
       :is-modal-visible="isModalVisible"
-      :user-data="selectRecord"
-      @handleUpdateUser="handleUpdateUser"
+      :app-data="selectRecord"
+      @handleUpdateApp="handleUpdateApp"
       @cancelModal="cancelModal"
     />
   </div>
 </template>
 <script setup lang="ts">
 import { ref, watchEffect } from "vue";
-import {
-  deleteUserUsingPost,
-  listUserByPageUsingPost,
-  updateUserUsingPost,
-} from "@/api/userController";
 import API from "@/api/typings";
-import AdminUpdateUserModalView from "@/views/admin/AdminUpdateUserModalView.vue";
 import message from "@arco-design/web-vue/es/message";
-import { listAppByPageUsingPost } from "@/api/appController";
+import {
+  deleteAppUsingPost,
+  editAppUsingPost,
+  listAppByPageUsingPost,
+  reviewAppUsingPost,
+} from "@/api/appController";
+import AdminUpdateAppModalView from "@/views/admin/AdminUpdateAppModalView.vue";
+import { REVIEW_STATUS_ENUM } from "@/constant/app";
 
 // 模态框展示与否
 const isModalVisible = ref(false);
@@ -73,6 +129,8 @@ const selectRecord = ref<API.AppVO | null>(null);
 // 数据总条数
 const total = ref(0);
 const dataList = ref<API.AppVO[]>([]);
+
+const fromSearchParams = ref<API.AppQueryRequest>({});
 /**
  * 初始化搜索分页条件
  */
@@ -101,7 +159,7 @@ const loadData = async () => {
  * @param id
  */
 const doDelete = async (id: number) => {
-  await deleteUserUsingPost({ id }).then((res) => {
+  await deleteAppUsingPost({ id }).then((res) => {
     if (res.data.code === 0) {
       loadData();
     }
@@ -112,12 +170,12 @@ const doDelete = async (id: number) => {
  * 修改
  * @param record
  */
-const doUpdate = (record: API.User) => {
+const doUpdate = (record: API.AppVO) => {
   selectRecord.value = record;
   isModalVisible.value = true;
 };
-const handleUpdateUser = async (updateUser: API.User) => {
-  await updateUserUsingPost(updateUser).then((res) => {
+const handleUpdateApp = async (updateUser: API.AppVO) => {
+  await editAppUsingPost(updateUser).then((res) => {
     if (res.data.code === 0) {
       message.success("修改成功");
       isModalVisible.value = false;
@@ -127,7 +185,31 @@ const handleUpdateUser = async (updateUser: API.User) => {
     }
   });
 };
+const doSerach = () => {
+  searchParams.value = {
+    ...searchParams.value,
+    ...fromSearchParams.value,
+  };
+};
+const doReview = async (record: API.AppVO, status: number, reason: string) => {
+  const appUpdateRequest: API.AppUpdateRequest = {
+    ...record,
+    reviewStatus: status,
+    reviewMessage: reason,
+  };
+  await reviewAppUsingPost(appUpdateRequest).then((res) => {
+    if (res.data.code === 0) {
+      message.success("审核成功");
+      loadData();
+    } else {
+      message.error("审核失败");
+    }
+  });
+};
 
+watchEffect(() => {
+  loadData();
+});
 /**
  * 关闭模态框
  * @param v
@@ -240,7 +322,4 @@ const columns = [
   },
 ];
 </script>
-<style scoped>
-#adminUser {
-}
-</style>
+<style scoped></style>
