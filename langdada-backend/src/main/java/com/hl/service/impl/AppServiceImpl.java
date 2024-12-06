@@ -3,6 +3,7 @@ import java.util.Date;
 import java.util.*;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -208,20 +209,22 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         // 关联查询用户信息
         Set<Long> userIdSet = records.stream().map(App::getUserId).collect(Collectors.toSet());
         userIdSet.addAll(records.stream().map(App::getReviewerId).collect(Collectors.toSet()));
-        Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
-                .collect(Collectors.groupingBy(User::getId));
-        // 填充信息
-        appVOList.forEach(appVO -> {
-            Long userId = appVO.getUserId();
-            User user = null;
-            if (userIdUserListMap.containsKey(userId)) {
-                user = userIdUserListMap.get(userId).get(0);
-                appVO.setUser(userService.getUserVO(user));
-            }
-            if(userIdUserListMap.containsKey(appVO.getReviewerId())){
-                appVO.setReviewerName(userIdUserListMap.get(appVO.getReviewerId()).get(0).getUserName());
-            }
-        });
+        if(!CollectionUtil.isEmpty(userIdSet)){
+            Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
+                    .collect(Collectors.groupingBy(User::getId));
+            // 填充信息
+            appVOList.forEach(appVO -> {
+                Long userId = appVO.getUserId();
+                User user = null;
+                if (userIdUserListMap.containsKey(userId)) {
+                    user = userIdUserListMap.get(userId).get(0);
+                    appVO.setUser(userService.getUserVO(user));
+                }
+                if(userIdUserListMap.containsKey(appVO.getReviewerId())){
+                    appVO.setReviewerName(userIdUserListMap.get(appVO.getReviewerId()).get(0).getUserName());
+                }
+            });
+        }
         appVOPage.setRecords(appVOList);
         return appVOPage;
     }
