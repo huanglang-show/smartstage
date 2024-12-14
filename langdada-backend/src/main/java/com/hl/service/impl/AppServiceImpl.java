@@ -185,7 +185,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
         Long userId = appQueryRequest.getUserId();
         String sortOrder = appQueryRequest.getSortOrder();
         // 构建查询条件
-        queryWrapper.eq(StringUtils.isNotBlank(appName), "appName", appName)
+        queryWrapper.like(StringUtils.isNotBlank(appName), "appName", appName)
                 .eq(appType != null, "appType", appType)
                 .eq(reviewStatus != null, "reviewStatus", reviewStatus)
                 .eq(reviewTime != null, "reviewTime", reviewTime)
