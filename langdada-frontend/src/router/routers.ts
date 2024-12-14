@@ -14,11 +14,8 @@ import AdminAnswerView from "@/views/admin/AdminAnswerView.vue";
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/home",
-    name: "home",
+    name: "主页",
     component: HomeView,
-    meta: {
-      access: "user",
-    },
   },
   {
     path: "/user",
