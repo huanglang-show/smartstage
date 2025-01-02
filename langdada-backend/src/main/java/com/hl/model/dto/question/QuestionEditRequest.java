@@ -15,9 +15,9 @@ import java.util.List;
 public class QuestionEditRequest implements Serializable {
 
     /**
-     * 应用 id
+     * 问题 id
      */
-    private Long appId;
+    private Long id;
 
     /**
      * 题目内容（json格式）
