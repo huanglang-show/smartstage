@@ -48,7 +48,8 @@
       <template #appIcon="{ record }">
         <!--        <a-image width="64" :src="record.userAvatar" />-->
         <!--        写死用于测试-->
-        <img width="40px" src="../../../public/labi.jpeg" alt="logo" />
+        <!--        <img width="40px" src="../../../public/labi.jpeg" alt="logo" />-->
+        <component :is="record.appIcon" />
       </template>
       <template #appType="{ record }">
         <div v-if="record.appType === 1">测评类</div>

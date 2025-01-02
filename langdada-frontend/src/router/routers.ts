@@ -10,6 +10,12 @@ import AdminAppView from "@/views/admin/AdminAppView.vue";
 import AdminQuestionView from "@/views/admin/AdminQuestionView.vue";
 import AdminScoringView from "@/views/admin/AdminScoringView.vue";
 import AdminAnswerView from "@/views/admin/AdminAnswerView.vue";
+import AppDetailView from "@/views/app/AppDetailView.vue";
+import AddQuestionPage from "@/views/add/AddQuestionPage.vue";
+import AddScoringResultPage from "@/views/add/AddScoringResultPage.vue";
+import AddAppPage from "@/views/add/AddAppPage.vue";
+import DoAnswerView from "@/views/answer/DoAnswerView.vue";
+import AccessEnum from "@/access/accessEnum";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -17,6 +23,55 @@ const routes: Array<RouteRecordRaw> = [
     name: "主页",
     component: HomeView,
   },
+  /*创建应用用户，编辑应用，题目，结果*/
+  {
+    path: "/add/app/:id",
+    name: "修改应用",
+    props: true,
+    component: AddAppPage,
+    meta: {
+      hideInMenu: true,
+    },
+  },
+  {
+    path: "/add/question/:appId",
+    name: "创建题目",
+    component: AddQuestionPage,
+    props: true,
+    meta: {
+      hideInMenu: true,
+    },
+  },
+  {
+    path: "/add/scoring_result/:appId",
+    name: "创建评分",
+    component: AddScoringResultPage,
+    props: true,
+    meta: {
+      hideInMenu: true,
+    },
+  },
+  {
+    path: "/app/detail/:id",
+    name: "应用详情",
+    component: AppDetailView,
+    props: true,
+    meta: {
+      hideInMenu: "true",
+    },
+  },
+  /*回答问题*/
+  {
+    path: "/answer/do/:appId",
+    name: "答题",
+    component: DoAnswerView,
+    props: true,
+    meta: {
+      hideInMenu: "true",
+      access: AccessEnum.USER,
+    },
+  },
+  /*用户登录，注册*/
   {
     path: "/user",
     name: "用户",
@@ -37,6 +92,7 @@ const routes: Array<RouteRecordRaw> = [
       hideInMenu: true,
     },
   },
+  /*admin管理*/
   {
     path: "/admin/user",
     name: "用户管理",

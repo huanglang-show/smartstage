@@ -369,7 +369,7 @@ declare namespace API {
   };
 
   type QuestionEditRequest = {
-    appId?: number;
+    id?: number;
     questionContent?: QuestionFrameWork[];
   };
 

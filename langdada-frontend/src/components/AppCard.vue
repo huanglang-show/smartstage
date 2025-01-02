@@ -1,9 +1,9 @@
 <template>
-  <a-card :style="{ width: '360px' }">
+  <a-card :style="{ width: '360px' }" @click="doCardClick">
     <template #actions>
-      <span class="icon-hover"> <IconThumbUp /> </span>
-      <span class="icon-hover"> <IconShareInternal /> </span>
-      <span class="icon-hover"> <IconMore /> </span>
+      <!--      <span class="icon-hover"> <IconThumbUp /> </span>-->
+      <span class="icon-hover" @click="doShare"> <IconShareInternal /> </span>
+      <!--      <span class="icon-hover"> <IconMore /> </span>-->
     </template>
     <template #cover>
       <div
@@ -29,7 +29,7 @@
           }"
         >
           <a-avatar :size="24" :style="{ marginRight: '8px' }"
-            ><img width="8px" src="../../public/labi.jpeg" alt="logo"
+            ><img width="1024" src="../../public/labi.jpeg" alt="logo"
           /></a-avatar>
           <a-typography-text
             >{{ app.user?.userName ?? "无名" }}
@@ -38,6 +38,7 @@
       </template>
     </a-card-meta>
   </a-card>
+  <ShareModal :link="shareLink" title="应用分享" ref="shareModalRef" />
 </template>
 
 <script setup lang="ts">
@@ -48,7 +49,9 @@ import {
 } from "@arco-design/web-vue/es/icon";
 import API from "@/api/typings";
 import AppVO = API.AppVO;
-import { withDefaults, defineProps } from "vue";
+import { withDefaults, defineProps, ref } from "vue";
+import { useRouter } from "vue-router";
+import ShareModal from "@/components/ShareModal.vue";
 
 interface Props {
   app: AppVO;
@@ -59,6 +62,29 @@ const props = withDefaults(defineProps<Props>(), {
     return {};
   },
 });
+
+const router = useRouter();
+/**
+ * 卡片点击跳转详情
+ */
+const doCardClick = () => {
+  router.push(`/app/detail/${props.app.id}`);
+};
+
+// 分享弹窗的引用
+const shareModalRef = ref();
+
+// 分享链接
+const shareLink = `${window.location.protocol}//${window.location.host}/app/detail/${props.app.id}`;
+
+// 分享
+const doShare = (e: Event) => {
+  if (shareModalRef.value) {
+    shareModalRef.value.openModal();
+  }
+  // 阻止冒泡，防止跳转到详情页
+  e.stopPropagation();
+};
 </script>
 <style scoped>
 .icon-hover {
