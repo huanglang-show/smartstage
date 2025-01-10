@@ -16,4 +16,16 @@ public enum AppTypeEnum {
         this.type = type;
         this.value = value;
     }
+
+    /**
+     * 通过type获取value
+     */
+    public static AppTypeEnum getEnumByType(Integer type) {
+        for (AppTypeEnum appTypeEnum : AppTypeEnum.values()) {
+            if (appTypeEnum.getType().equals(type)) {
+                return appTypeEnum;
+            }
+        }
+        return null;
+    }
 }

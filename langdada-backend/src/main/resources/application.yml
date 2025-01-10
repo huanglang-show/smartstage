@@ -94,3 +94,5 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - com.hl.controller
+ai:
+  apiKey: 345eaebe77894ea09ffd1e53ed2d0fbe.sbko5Hk07NvqNd3p

@@ -1,5 +1,6 @@
 package com.hl.controller;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hl.annotation.AuthCheck;
@@ -26,6 +27,7 @@ import com.hl.service.UserAnswerService;
 import com.hl.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -62,6 +64,7 @@ public class UserAnswerController {
      * @return 新写入的数据 id
      */
     @PostMapping("/add")
+    @Transactional
     public BaseResponse<Long> addUserAnswer(@RequestBody UserAnswerAddRequest userAnswerAddRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(userAnswerAddRequest == null, ErrorCode.PARAMS_ERROR);
         // 将实体类和 DTO 进行转换
@@ -261,5 +264,10 @@ public class UserAnswerController {
         boolean result = userAnswerService.updateById(userAnswer);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
+    }
+
+    @GetMapping("/generate/id")
+    public BaseResponse<Long> generateUserAnswerId() {
+        return ResultUtils.success(IdUtil.getSnowflakeNextId());
     }
 }
