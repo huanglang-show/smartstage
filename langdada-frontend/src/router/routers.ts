@@ -15,6 +15,8 @@ import AddQuestionPage from "@/views/add/AddQuestionPage.vue";
 import AddScoringResultPage from "@/views/add/AddScoringResultPage.vue";
 import AddAppPage from "@/views/add/AddAppPage.vue";
 import DoAnswerView from "@/views/answer/DoAnswerView.vue";
+import AnswerResultView from "@/views/answer/AnswerResultView.vue";
+import MyAnswerView from "@/views/answer/MyAnswerView.vue";
 import AccessEnum from "@/access/accessEnum";
 
 const routes: Array<RouteRecordRaw> = [
@@ -22,6 +24,14 @@ const routes: Array<RouteRecordRaw> = [
     path: "/home",
     name: "主页",
     component: HomeView,
+  },
+  {
+    path: "/add/app",
+    name: "创建应用",
+    component: AddAppPage,
+    meta: {
+      access: AccessEnum.USER,
+    },
   },
   /*创建应用用户，编辑应用，题目，结果*/
   {
@@ -31,6 +41,7 @@ const routes: Array<RouteRecordRaw> = [
     component: AddAppPage,
     meta: {
       hideInMenu: true,
+      access: AccessEnum.USER,
     },
   },
   {
@@ -40,6 +51,7 @@ const routes: Array<RouteRecordRaw> = [
     props: true,
     meta: {
       hideInMenu: true,
+      access: AccessEnum.USER,
     },
   },
   {
@@ -49,6 +61,7 @@ const routes: Array<RouteRecordRaw> = [
     props: true,
     meta: {
       hideInMenu: true,
+      access: AccessEnum.USER,
     },
   },
   {
@@ -57,7 +70,7 @@ const routes: Array<RouteRecordRaw> = [
     component: AppDetailView,
     props: true,
     meta: {
-      hideInMenu: "true",
+      hideInMenu: true,
     },
   },
   /*回答问题*/
@@ -67,10 +80,31 @@ const routes: Array<RouteRecordRaw> = [
     component: DoAnswerView,
     props: true,
     meta: {
-      hideInMenu: "true",
+      hideInMenu: true,
       access: AccessEnum.USER,
     },
   },
+  /*查看答题结果*/
+  {
+    path: "/answer/my",
+    name: "我的答题",
+    component: MyAnswerView,
+    meta: {
+      access: AccessEnum.USER,
+    },
+  },
+  /*查看答题结果*/
+  {
+    path: "/answer/result/:id",
+    name: "查看答题结果",
+    component: AnswerResultView,
+    props: true,
+    meta: {
+      hideInMenu: true,
+      access: AccessEnum.USER,
+    },
+  },
+
   /*用户登录，注册*/
   {
     path: "/user",

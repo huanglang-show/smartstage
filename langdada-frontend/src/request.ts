@@ -4,7 +4,7 @@ import { useLoginUserStore } from "@/store/userStore";
 
 const myAxios = axios.create({
   baseURL: "http://localhost:8101",
-  timeout: 60000,
+  timeout: 120000,
   withCredentials: true,
   // headers: { "X-Custom-Header": "foobar" },
 });

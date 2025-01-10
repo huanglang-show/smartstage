@@ -33,7 +33,6 @@ export async function uploadFileUsingPost(
     }
   });
 
-  // @ts-ignore
   return request<API.BaseResponseString_>("/api/file/upload", {
     method: "POST",
     params: {

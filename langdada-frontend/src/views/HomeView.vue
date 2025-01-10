@@ -16,7 +16,7 @@
     </a-form>
     <a-list
       class="list-demo-action-layout"
-      :grid-props="{ gutter: [350, 20], sm: 24, md: 12, lg: 8, xl: 6 }"
+      :grid-props="{ gutter: [390, 20], sm: 24, md: 12, lg: 8, xl: 6 }"
       :bordered="false"
       :data="appList"
       :pagination-props="{
@@ -60,10 +60,11 @@ const loadAppList = async () => {
     ...searchParams.value,
     ...fromSearchParams.value,
   };
+  params.reviewStatus = 1;
   await listAppVoByPageUsingPost(params).then((res) => {
     if (res.data.code === 0) {
       appList.value = res.data.data?.records ?? [];
-      total.value = res.data.data?.total ?? 0;
+      total.value = Number(res.data.data?.total) ?? 0;
     }
   });
 };

@@ -6,6 +6,7 @@ import * as wxMpController from "./wxMpController";
 import * as appController from "./appController";
 import * as fileController from "./fileController";
 import * as questionController from "./questionController";
+import * as aiQuestionController from "./aiQuestionController";
 import * as scoringResultController from "./scoringResultController";
 import * as userController from "./userController";
 import * as userAnswerController from "./userAnswerController";
@@ -14,6 +15,7 @@ export default {
   appController,
   fileController,
   questionController,
+  aiQuestionController,
   scoringResultController,
   userController,
   userAnswerController,

@@ -32,7 +32,6 @@
       </a-space>
     </template>
   </a-table>
-
 </template>
 <script setup lang="ts">
 import { ref, watchEffect, withDefaults, defineProps, defineExpose } from "vue";

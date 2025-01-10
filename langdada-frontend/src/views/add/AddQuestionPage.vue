@@ -17,13 +17,13 @@
             底部添加题目
           </a-button>
           <!-- AI 生成抽屉 -->
-          <!--          <AiGenerateQuestionDrawer-->
-          <!--            :appId="appId"-->
-          <!--            :onSuccess="onAiGenerateSuccess"-->
-          <!--            :onSSESuccess="onAiGenerateSuccessSSE"-->
-          <!--            :onSSEClose="onSSEClose"-->
-          <!--            :onSSEStart="onSSEStart"-->
-          <!--          />-->
+          <AiGeneratorQuestion
+            :app-id="appId"
+            :on-success="onAiGeneratorSuccess"
+            :on-success-s-s-e="onAiGenerateSuccessSSE"
+            :on-s-s-e-start="onSSEStart"
+            :on-s-s-e-close="onSSEClose"
+          />
         </a-space>
         <!-- 遍历每道题目 -->
         <div v-for="(question, index) in questionContent" :key="index">
@@ -113,7 +113,7 @@ import {
 } from "@/api/questionController";
 import message from "@arco-design/web-vue/es/message";
 import API from "@/api/typings";
-// import AiGenerateQuestionDrawer from "@/views/add/components/AiGenerateQuestionDrawer.vue";
+import AiGeneratorQuestion from "@/views/add/components/AiGeneratorQuestion.vue";
 
 interface Props {
   appId: string;
@@ -181,6 +181,19 @@ const deleteQuestionOption = (
 
 const oldQuestion = ref<API.QuestionVO>();
 
+/**
+ * AI生成题目成功后回调-一键生成
+ */
+const onAiGeneratorSuccess = (result: API.QuestionFrameWork[]) => {
+  message.success("AI生成题目成功,生成" + result.length + "道题目");
+  questionContent.value = [...questionContent.value, ...result];
+};
+/**
+ * AI生成题目成功后回调-实时生成
+ */
+const onAiGeneratorSuccessSSE = (result: API.QuestionFrameWork) => {
+  questionContent.value = [...questionContent.value, result];
+};
 /**
  * 加载数据
  */

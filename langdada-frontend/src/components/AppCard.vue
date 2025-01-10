@@ -1,5 +1,5 @@
 <template>
-  <a-card :style="{ width: '360px' }" @click="doCardClick">
+  <a-card :style="{ width: '360px', cursor: 'pointer' }" @click="doCardClick">
     <template #actions>
       <!--      <span class="icon-hover"> <IconThumbUp /> </span>-->
       <span class="icon-hover" @click="doShare"> <IconShareInternal /> </span>
